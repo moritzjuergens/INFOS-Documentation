@@ -1,0 +1,11 @@
+Starting Nmap 7.91 ( https://nmap.org ) at 2021-12-14 04:42 EST
+Nmap scan report for 10.0.2.4
+Host is up (0.00049s latency).
+All 65535 scanned ports on 10.0.2.4 are closed
+MAC Address: 08:00:27:BE:A1:CA (Oracle VirtualBox virtual NIC)
+Too many fingerprints match this host to give specific OS details
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   0.49 ms 10.0.2.4

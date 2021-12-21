@@ -1,0 +1,22 @@
+==================================================
+                Firewall-Closed
+==================================================
+Flushing rules...
+Denying incoming connections...Chain INPUT (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out   source    destination         
+    0     0 ACCEPT     tcp  --  any    any   anywhere  anywhere             
+    tcp dpt:ssh
+    0     0 ACCEPT     all  --  lo     any   anywhere  anywhere            
+    0     0 ACCEPT     all  --  any    any   anywhere  anywhere             
+    ctstate RELATED,ESTABLISHED
+
+Chain FORWARD (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out   source    destination         
+
+Chain OUTPUT (policy DROP 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out   source    destination         
+    0     0 ACCEPT     tcp  --  any    any   anywhere  anywhere             
+    tcp dpt:ssh
+    0     0 ACCEPT     all  --  any    lo    anywhere  anywhere            
+==================================================
+                Process finished  

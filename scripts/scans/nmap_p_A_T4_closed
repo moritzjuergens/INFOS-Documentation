@@ -1,0 +1,10 @@
+Nmap scan report for 10.0.2.4
+Host is up (0.00083s latency).
+All 65535 scanned ports on 10.0.2.4 are filtered
+MAC Address: 08:00:27:BE:A1:CA (Oracle VirtualBox virtual NIC)
+Too many fingerprints match this host to give specific OS details
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   0.83 ms 10.0.2.4

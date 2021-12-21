@@ -1,0 +1,15 @@
+Nmap scan report for 10.0.2.4
+Host is up (0.0011s latency).
+Not shown: 992 closed ports
+PORT      STATE         SERVICE
+49/udp    open|filtered tacacs
+800/udp   open|filtered mdbs_daemon
+17505/udp open|filtered unknown
+19075/udp open|filtered unknown
+19332/udp open|filtered unknown
+26872/udp open|filtered unknown
+27892/udp open|filtered unknown
+33281/udp open|filtered unknown
+MAC Address: 08:00:27:BE:A1:CA (Oracle VirtualBox virtual NIC)
+
+Nmap done: 1 IP address (1 host up) scanned in 1088.71 seconds
