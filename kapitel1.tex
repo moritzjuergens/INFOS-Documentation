@@ -155,3 +155,28 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum fermentum se
 Vivamus sit amet tellus pellentesque, commodo est vitae, interdum ante. In eu vestibulum dolor, in venenatis felis. Ut risus odio, convallis in aliquet quis, luctus quis sem. Vivamus malesuada ex eget vehicula finibus. Mauris iaculis finibus diam vel ultrices. Morbi luctus nulla euismod sodales posuere. Integer dignissim gravida orci, at porttitor nibh varius ac. Donec vel efficitur nulla. In fermentum mauris elit, a efficitur elit accumsan id. Interdum et malesuada fames ac ante ipsum primis in faucibus.
 
 Proin lacinia malesuada leo sit amet bibendum. Integer dictum ultrices enim id condimentum. Ut egestas vulputate quam. Pellentesque bibendum nec turpis ac ultricies. Sed at ligula nec urna bibendum convallis consequat at turpis. Sed id dolor eros. Nullam maximus turpis in massa ornare accumsan. Sed id dapibus eros, tincidunt ullamcorper risus. In tincidunt, nunc at suscipit placerat, nulla justo imperdiet est, id convallis libero elit a nulla. Vivamus velit odio, convallis sed dignissim vitae, pharetra eu tellus. Sed eu dignissim felis, ac rhoncus est. Vivamus ac aliquam urna. Pellentesque lectus risus, porta eu diam in, volutpat pharetra justo. Donec elit diam, maximus vitae congue et, condimentum a magna.
+
+\chapter{Projektphase 2 – Webserver}
+\section{Setup}
+Das Setup in dieser Phase besteht aus drei Teilen
+\subsection{Datenbank}
+Für das Projekt wurde PostgreSQL (auch Postgres) als Datenbank gewählt. So wurde über Docker eine Container-Instanz einer Postgres Datenbank gestartet, die auf dem localhost der Hostmaschine läuft. \\
+Die Datenbank enthält zwei Tabllen – User und Post – welche jeweils eine inkrementierende ID als Primärschlüssel besitzen. 
+Die Tabelle User enthält dabei zusätzlich den Benutzernamen und das Passwort des Nutzers – wobei beide bewussterweise im Klartext gespeichert werden. 
+Die Tabelle Post enthält neben der ID noch die Attribute Title und Content, welche bei der Ausgabe der Posts angezeigt werden. 
+\subsection{API}
+Zur Entwicklung einer simplen CRUD API wurde das Framework Express.js gewählt. 
+\subsection{Frontend}
+Das Frontend wurde mit Hilfe von Vue.js implementiert.
+\section{Cross-Site-Scripting}
+Das Script für die \ac{XSS} Attacke
+
+Unter dem Begriff \ac{XSS} versteht man einen Typ der Injektionsattacken, bei dem schadhafter Code – oft in Form eines browserseitigen Scripts – bei einem Endnutzer ausgeführt wird. Diese werden durch mangelhafte bzw. fehlende Überprüfung von Nutzereingaben ermöglicht. \\
+Um ein Beispiel eines \ac{XSS} wurde im Falle dieses Projektes weder im Frontend noch in der API eine Kontrolle der Nutzereingaben des Blogs vorgenommen. So konnte es erreicht werden, dass durch das Posten eines Scripts fremder Code ausgeführt wurde. 
+
+\begin{quotation}
+	<img src=``notValidUrl`` onerror=alert(document.cookie)>
+\end{quotation}
+
+
+\section{SQL Injection}
