@@ -165,18 +165,17 @@ Die Datenbank enthält zwei Tabllen – User und Post – welche jeweils eine in
 Die Tabelle User enthält dabei zusätzlich den Benutzernamen und das Passwort des Nutzers – wobei beide bewussterweise im Klartext gespeichert werden. 
 Die Tabelle Post enthält neben der ID noch die Attribute Title und Content, welche bei der Ausgabe der Posts angezeigt werden. 
 \subsection{API}
-Zur Entwicklung einer simplen CRUD API wurde das Framework Express.js gewählt. 
+Als Schnittstelle zur Datenbank wurde eine Express.js API gewählt. Hier werden die typischen CRUD Operationen durchgeführt, sowie auch ein Teil der Sessionerstellung geregelt. 
 \subsection{Frontend}
 Das Frontend wurde mit Hilfe von Vue.js implementiert.
 \section{Cross-Site-Scripting}
 Das Script für die \ac{XSS} Attacke
 
 Unter dem Begriff \ac{XSS} versteht man einen Typ der Injektionsattacken, bei dem schadhafter Code – oft in Form eines browserseitigen Scripts – bei einem Endnutzer ausgeführt wird. Diese werden durch mangelhafte bzw. fehlende Überprüfung von Nutzereingaben ermöglicht. \\
-Um ein Beispiel eines \ac{XSS} wurde im Falle dieses Projektes weder im Frontend noch in der API eine Kontrolle der Nutzereingaben des Blogs vorgenommen. So konnte es erreicht werden, dass durch das Posten eines Scripts fremder Code ausgeführt wurde. 
+Um dieses zu demonstrieren, wurde bei diesem Projekt bewusst darauf verzichtet Nutzereingaben zu überprüfen. 
 
-\begin{quotation}
-	<img src=``notValidUrl`` onerror=alert(document.cookie)>
-\end{quotation}
+
+
 
 
 \section{SQL Injection}
