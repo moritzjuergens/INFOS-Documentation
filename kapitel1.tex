@@ -158,24 +158,26 @@ Proin lacinia malesuada leo sit amet bibendum. Integer dictum ultrices enim id c
 
 \chapter{Projektphase 2 – Webserver}
 \section{Setup}
-Das Setup in dieser Phase besteht aus drei Teilen
 \subsection{Datenbank}
 Für das Projekt wurde PostgreSQL (auch Postgres) als Datenbank gewählt. So wurde über Docker eine Container-Instanz einer Postgres Datenbank gestartet, die auf dem localhost der Hostmaschine läuft. \\
 Die Datenbank enthält zwei Tabllen – User und Post – welche jeweils eine inkrementierende ID als Primärschlüssel besitzen. 
 Die Tabelle User enthält dabei zusätzlich den Benutzernamen und das Passwort des Nutzers – wobei beide bewussterweise im Klartext gespeichert werden. 
 Die Tabelle Post enthält neben der ID noch die Attribute Title und Content, welche bei der Ausgabe der Posts angezeigt werden. 
 \subsection{API}
-Als Schnittstelle zur Datenbank wurde eine Express.js API gewählt. Hier werden die typischen CRUD Operationen durchgeführt, sowie auch ein Teil der Sessionerstellung geregelt. 
+Zur Demostration der beiden Attacken werden zwei APIs genutzt. Beide werden mit Hilfe des Express.js Frameworks implementiert. \\
+Die erste – und umfangreichere – API stellt die Schnittstelle zur Datenbank der Blog-Applikation dar. Hier werden die typischen CRUD Operationen durchgeführt und ans Frontend angebunden. Zudem wird ein Teil der Sessionerstellung hier geregelt. \\
+Die andere API stellt den Angreifer dar. Sie bietet auch nur eine Schnittstelle, über welche der Session-Cookie des Opfers gesendet wird. 
 \subsection{Frontend}
-Das Frontend wurde mit Hilfe von Vue.js implementiert.
+Das Frontend bildet einen Webblog ab, welcher das Posten von Textbeiträgen ermöglicht. So wie in der Datenbank abgebildet, werden hier Titel und Content eingetragen und an die API verschickt. \\
+Das Frontend wurde mit Vue.js entwickelt und bietet aus diesem Grund einige prädefinierten Sicherheitsfunktionen, die eine \ac{XSS}-Attacke vorbeugen sollen. 
+Aus diesem Grund werden die Inhalte aus der Datenbank mit Hilfe des v-HTML Attributs in das Frontend eingebunden, anstatt der üblichen ``Mustache`` Notation.
 \section{Cross-Site-Scripting}
-Das Script für die \ac{XSS} Attacke
 
 Unter dem Begriff \ac{XSS} versteht man einen Typ der Injektionsattacken, bei dem schadhafter Code – oft in Form eines browserseitigen Scripts – bei einem Endnutzer ausgeführt wird. Diese werden durch mangelhafte bzw. fehlende Überprüfung von Nutzereingaben ermöglicht. \\
 Um dieses zu demonstrieren, wurde bei diesem Projekt bewusst darauf verzichtet Nutzereingaben zu überprüfen. 
 
-
-
-
+Das Ziel der Demonstration ist es den Session-Cookie zu stehlen. Um dies zu erreichen wird ein neuer Blog-Post erstellt, wo anstatt eines Textes ein fehlerhaftes HTML <img> Element eingegeben wird. Beim erneuten Aufrufen der Seite wird nun von der Anwendung versucht ein Bild für dieses <img> zu rendern, erhält jedoch nur einen Fehler, da die URL bewusstermaßen fehlerhaft ist. 
+Nun ist es möglich mittels des HTML Attributs "onerror" der Applikation vorzuschreiben, wie mit dem Fehler umzugehen ist. Dies wird mittels validem JavaScript Code geschafft. So wird nun ein Request an die hostile API gesendet, wo über die document.cookie funktion nun der Session-Cookie übertragen wird. 
+Abschließend ist der Session-Cookie auf der Console des hostilen Servers zu finden.
 
 \section{SQL Injection}
