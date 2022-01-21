@@ -1,0 +1,1 @@
+');DELETE FROM blog.post WHERE title = 'test';

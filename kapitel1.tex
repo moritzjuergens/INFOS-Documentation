@@ -1,9 +1,9 @@
 % !TEX root =  master.tex
 \chapter{Projektphase 1 – Firewall}
-Die Firewall-Konfigurationen werden mittels IP-Tables auf der Opfermaschine erstellt. Dabei wurden Bash-Scripts implementiert, um die jeweils notwendigen Befehle nachvollziehen zu können. Zudem wird sämtlicher Datenverkehr der Penetrationstests aufgezeichnet und interpretiert. 
+Die Firewall-Konfigurationen wurden mittels IP-Tables auf der Opfermaschine erstellt. Dabei wurden Bash-Scripts implementiert, um die jeweils notwendigen Befehle nachvollziehen zu können. Zudem wird sämtlicher Datenverkehr der Penetrationstests aufgezeichnet und interpretiert. 
 \section{Offene Konfiguration}
 
-Zunächst wird auf der Opfermaschine eine offene Konfiguration der Firewall erstellt. Das bedeutet in diesem Fall, dass jeglicher einkehrender sowie jeglicher auskehrende Datenverkehr ungehindert zugelassen wird. In dieser Konfiguration werden weder Kommunikationsquellen noch Inhalt gefiltert oder geblockt.
+Zunächst wird auf der Opfermaschine eine offene Konfiguration der Firewall erstellt. Das bedeutet in diesem Fall, dass jeglicher eingehender sowie jeglicher ausgehender Datenverkehr ungehindert zugelassen wird. In dieser Konfiguration werden weder Kommunikationsquellen noch Inhalt gefiltert oder geblockt.
 
 \subsection{Script}
 Der erste Schritt setzt die IP-Tables auf ihre Ursprungswerte zurück. Das heißt, dass alle einkommenden, ausgehenden und weitergeleiteten Pakete ungefiltert zugelassen werden. Zusätzlich zu der normalen IP-Tables Konfiguration wird hier auch noch die NAT-Konfiguration gesetzt.  
@@ -14,8 +14,8 @@ Das Script besteht aus drei wesentlichen Prozessen:
 	\item Logging
 \end{itemize} 
 
-Als nächstes werden alle noch überbleibenden Ausnahmeregelungen `geflushed`. Das bedeutet, dass diese gelöscht und auf den Standardwert zurückgesetzt werden. Dies ermöglicht es eine saubere Basiskonfiguration zu erhalten.\\
-Abschließend wird das Logging behandelt. Damit am Ende des Vorgangs nachvollzogen werden kann, welche Pakte eingetroffen bzw. ausgetreten sind, wird der Datenverkehr vom Script aus protokolliert.
+Als nächstes werden alle noch überbleibenden Ausnahmeregelungen `geflushed`. Das bedeutet, dass diese gelöscht und auf den Standardwert zurückgesetzt werden. Hierdurch wird eine saubere und reproduzierbare Basiskonfiguration sichergestellt.\\
+Abschließend wird das Logging behandelt. Damit am Ende des Vorgangs nachvollzogen werden kann, welche Pakete eingetroffen bzw. ausgetreten sind, wird der Datenverkehr vom Script aus protokolliert.
 Zusätzlich zu den drei Funktionen des Scripts wird nach Abschluss die Konfiguration in der Konsole ausgegeben.
 
 \newpage
@@ -66,7 +66,7 @@ Auf der Abbildung \ref{fig:ws_firewall_open_udp} ist zu erkennen, wie der UDP Sc
 Am Output des Scans lässt sich erkennen, dass dieser wesentlich länger gebraucht hat als der vorherige TCP Scan. So hat der UDP Scan 18 Minuten gebraucht um die wichtigesten 1000 Ports des Opfers zu scannen. Desweiteren wird berichtet, dass acht Ports offen bzw. gefiltert sind. Da keine Services auf der Opfermaschine laufen oder Firewall-Filter gesetzt sind lässt sich vermuten, dass diese Ports fehlerhaft als offen | gefiltert angezeigt werden. So kann es sein, dass die Opfermaschine nicht schnell genug auf die Anfragen des Angreifers geantwortet haben und somit der Timeout von NMAP erreicht wurde. 
 
 \subsection{Penetrationtest - Outward}
-
+Als nächstes wird getestet, welchen Einfluss die Firewall auf die Funktionalität der Maschine hat. So wird zunächst getestet 
 \section{Geschlossene Konfiguration}
 Als nächstes wird eine Konfiguration getestet, in der alle Verbindungen geblockt werden. Zu dieser Konfiguration gehören die Ausnahmen: SSH und localhost. Das Ziel dieses Tests ist es zu prüfen, wie die Opfermaschine von außen angesprochen werden kann – bzw. welche Informationen ein potentieller Angreifer erhalten könnte.
  
@@ -140,44 +140,43 @@ Proin lacinia malesuada leo sit amet bibendum. Integer dictum ultrices enim id c
 \subsection{Script}
 Das Script zur Erstellung einer Firewall, wie sie möglicherweise in Unternehmen vorkommen könnte, ähnelt dem aus Kapitel 2.2.1 sehr. 
 Es besteht aus den gleichen sechs Teilen, obwohl das Logging hier auf Grund der Länge des Scripts vernachlässigt wird.
-Zunächst werden alle bestehenden Regeln gelöscht – gefluscht – um die Firewall auf ihre Basiskonfiguration zurückzusetzen. Dies verhindert mögliche Konflikte mit bestehenden Regeln im weiteren Verlauf. 
+Zunächst werden alle bestehenden Regeln gelöscht – gefluscht – um die Firewall auf ihre Basiskonfiguration zurückzusetzen. Dies verhindert mögliche Konflikte mit bestehenden Regeln im weiteren Verlauf. \\
+Darauf folgend werden alle eingehenden, weiterleitenden und ausgehenden Verbindungen blockiert, bestehende Verbindungen sowie Antworten auf Etablierte werden jedoch weiterhin zugelassen. 
+Abschließend werden die Ausnahmeregelungen behandelt, welche den Hauptunterschied zu der vorherigen Konfiguration darstellen. \\
+Hier werden die Ports für SSH sowohl eingehend als auch ausgehend zugelassen. Zusätzlich werden die Ports 22, 53, 80 und 443 ausgehend zugelassen, hauptsächlich um Verbindung zum Internet herstellen zu können. 
+Zudem sind dem Port 53 UDP Verbindungen gestattet, da das DNS Protokoll hauptsächlich über UDP funktioniert. 
 
 \subsection{Penetrationstest – Inward}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum fermentum semper mollis. Ut porta odio in ultrices fermentum. Aenean id pulvinar nisi. Phasellus porttitor condimentum suscipit. Nulla facilisi. Mauris in malesuada arcu. Morbi tempus bibendum tempor.
+\subsubsection{nmap 10.0.2.4 -p- -A -T4}
+Wie auch bei den vorherigen Konfigurationen, wird hier ebenfalls zunächst ein TCP SYN Scan durchgeführt. Da in dieser Firewall-Konfiguration keine fundamentalen Veränderungen durchgeführt wurden, werden den Vorgängern ähnliche Ergebnisse erwartet. Es sollte der Angreifermaschine nur ein Port ersichtlich sein, da alle Anderen nur von innen nach außen funktionieren. \\
+Output:
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/ws_firewall_standard.png}
+	\caption{Datenverkehr der Opfermaschine}
+	\label{fig:ws_firewall_standard}
+\end{figure}
 
-Vivamus sit amet tellus pellentesque, commodo est vitae, interdum ante. In eu vestibulum dolor, in venenatis felis. Ut risus odio, convallis in aliquet quis, luctus quis sem. Vivamus malesuada ex eget vehicula finibus. Mauris iaculis finibus diam vel ultrices. Morbi luctus nulla euismod sodales posuere. Integer dignissim gravida orci, at porttitor nibh varius ac. Donec vel efficitur nulla. In fermentum mauris elit, a efficitur elit accumsan id. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+\lstinputlisting{scripts/scans/nmap_p_A_T4_standard}
 
-Proin lacinia malesuada leo sit amet bibendum. Integer dictum ultrices enim id condimentum. Ut egestas vulputate quam. Pellentesque bibendum nec turpis ac ultricies. Sed at ligula nec urna bibendum convallis consequat at turpis. Sed id dolor eros. Nullam maximus turpis in massa ornare accumsan. Sed id dapibus eros, tincidunt ullamcorper risus. In tincidunt, nunc at suscipit placerat, nulla justo imperdiet est, id convallis libero elit a nulla. Vivamus velit odio, convallis sed dignissim vitae, pharetra eu tellus. Sed eu dignissim felis, ac rhoncus est. Vivamus ac aliquam urna. Pellentesque lectus risus, porta eu diam in, volutpat pharetra justo. Donec elit diam, maximus vitae congue et, condimentum a magna.
+Der Output dieses Scans ist identisch mit dem aus Kapitel 2.2.2, mit der Ausnahme des Ports 22. Ein maßgeblicher Unterschied wird sich erst bei einem ausgehenden Test erkennen lassen.
+
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/ws_firewall_standard_2.png}
+	\caption{Fort.: Datenverkehr der Opfermaschine}
+	\label{fig:ws_firewall_standard_2}
+\end{figure}
+
+\subsubsection{nmap 10.0.2.4 -sU -T4}
+Im Script wurde der Port 53, welcher für das DNS Protokoll verwendet wird, für ausgehende UDP Pakete geöffnet. Diese Ausnahmeregelung ist die Einzige, die UDP betrifft. Da die Ausnahme nur für ausgehende Pakete gilt, ist es zu erwarten, dass ähnlich wie in Kapitel 2.2.2 alle Ports als ``open | filtered`` gezeigt werden. \\
+Output: 
+
+\lstinputlisting{scripts/scans/nmap_sU_T4_standard}
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/ws_firewall_standard_udp.png}
+	\caption{Datenverkehr der Opfermaschine – UDP}
+	\label{fig:ws_firewall_standard_udp}
+\end{figure}
 \subsection{Penetrationtest – Outward}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum fermentum semper mollis. Ut porta odio in ultrices fermentum. Aenean id pulvinar nisi. Phasellus porttitor condimentum suscipit. Nulla facilisi. Mauris in malesuada arcu. Morbi tempus bibendum tempor.
+Als nächstes wird getestet, welchen Einfluss
 
-Vivamus sit amet tellus pellentesque, commodo est vitae, interdum ante. In eu vestibulum dolor, in venenatis felis. Ut risus odio, convallis in aliquet quis, luctus quis sem. Vivamus malesuada ex eget vehicula finibus. Mauris iaculis finibus diam vel ultrices. Morbi luctus nulla euismod sodales posuere. Integer dignissim gravida orci, at porttitor nibh varius ac. Donec vel efficitur nulla. In fermentum mauris elit, a efficitur elit accumsan id. Interdum et malesuada fames ac ante ipsum primis in faucibus.
-
-Proin lacinia malesuada leo sit amet bibendum. Integer dictum ultrices enim id condimentum. Ut egestas vulputate quam. Pellentesque bibendum nec turpis ac ultricies. Sed at ligula nec urna bibendum convallis consequat at turpis. Sed id dolor eros. Nullam maximus turpis in massa ornare accumsan. Sed id dapibus eros, tincidunt ullamcorper risus. In tincidunt, nunc at suscipit placerat, nulla justo imperdiet est, id convallis libero elit a nulla. Vivamus velit odio, convallis sed dignissim vitae, pharetra eu tellus. Sed eu dignissim felis, ac rhoncus est. Vivamus ac aliquam urna. Pellentesque lectus risus, porta eu diam in, volutpat pharetra justo. Donec elit diam, maximus vitae congue et, condimentum a magna.
-
-\chapter{Projektphase 2 – Webserver}
-\section{Setup}
-\subsection{Datenbank}
-Für das Projekt wurde PostgreSQL (auch Postgres) als Datenbank gewählt. So wurde über Docker eine Container-Instanz einer Postgres Datenbank gestartet, die auf dem localhost der Hostmaschine läuft. \\
-Die Datenbank enthält zwei Tabllen – User und Post – welche jeweils eine inkrementierende ID als Primärschlüssel besitzen. 
-Die Tabelle User enthält dabei zusätzlich den Benutzernamen und das Passwort des Nutzers – wobei beide bewussterweise im Klartext gespeichert werden. 
-Die Tabelle Post enthält neben der ID noch die Attribute Title und Content, welche bei der Ausgabe der Posts angezeigt werden. 
-\subsection{API}
-Zur Demostration der beiden Attacken werden zwei APIs genutzt. Beide werden mit Hilfe des Express.js Frameworks implementiert. \\
-Die erste – und umfangreichere – API stellt die Schnittstelle zur Datenbank der Blog-Applikation dar. Hier werden die typischen CRUD Operationen durchgeführt und ans Frontend angebunden. Zudem wird ein Teil der Sessionerstellung hier geregelt. \\
-Die andere API stellt den Angreifer dar. Sie bietet auch nur eine Schnittstelle, über welche der Session-Cookie des Opfers gesendet wird. 
-\subsection{Frontend}
-Das Frontend bildet einen Webblog ab, welcher das Posten von Textbeiträgen ermöglicht. So wie in der Datenbank abgebildet, werden hier Titel und Content eingetragen und an die API verschickt. \\
-Das Frontend wurde mit Vue.js entwickelt und bietet aus diesem Grund einige prädefinierten Sicherheitsfunktionen, die eine \ac{XSS}-Attacke vorbeugen sollen. 
-Aus diesem Grund werden die Inhalte aus der Datenbank mit Hilfe des v-HTML Attributs in das Frontend eingebunden, anstatt der üblichen ``Mustache`` Notation.
-\section{Cross-Site-Scripting}
-
-Unter dem Begriff \ac{XSS} versteht man einen Typ der Injektionsattacken, bei dem schadhafter Code – oft in Form eines browserseitigen Scripts – bei einem Endnutzer ausgeführt wird. Diese werden durch mangelhafte bzw. fehlende Überprüfung von Nutzereingaben ermöglicht. \\
-Um dieses zu demonstrieren, wurde bei diesem Projekt bewusst darauf verzichtet Nutzereingaben zu überprüfen. 
-
-Das Ziel der Demonstration ist es den Session-Cookie zu stehlen. Um dies zu erreichen wird ein neuer Blog-Post erstellt, wo anstatt eines Textes ein fehlerhaftes HTML <img> Element eingegeben wird. Beim erneuten Aufrufen der Seite wird nun von der Anwendung versucht ein Bild für dieses <img> zu rendern, erhält jedoch nur einen Fehler, da die URL bewusstermaßen fehlerhaft ist. 
-Nun ist es möglich mittels des HTML Attributs "onerror" der Applikation vorzuschreiben, wie mit dem Fehler umzugehen ist. Dies wird mittels validem JavaScript Code geschafft. So wird nun ein Request an die hostile API gesendet, wo über die document.cookie funktion nun der Session-Cookie übertragen wird. 
-Abschließend ist der Session-Cookie auf der Console des hostilen Servers zu finden.
-
-\section{SQL Injection}

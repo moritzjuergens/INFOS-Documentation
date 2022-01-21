@@ -34,12 +34,3 @@ $IPTABLES -L -v
 
 printf '=%.0s' {1..50}
 printf "\n\t\tProcess finished"
-
-$IPTABLES -A INPUT -p tcp -j LOG -m limit --limit 5/m \
---log-prefix 'DROP IN TCP: '
-$IPTABLES -A INPUT -p udp -j LOG -m limit --limit 5/m \
---log-prefix 'DROP IN UDP: '
-$IPTABLES -A OUTPUT -p tcp -j LOG -m limit --limit 5/m \
---log-prefix 'DROP OUT TCP: '
-$IPTABLES -A OUTPUT -p udp -j LOG -m limit --limit 5/m \
---log-prefix 'DROP OUT UDP: '
