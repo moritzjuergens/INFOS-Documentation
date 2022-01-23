@@ -1,4 +1,5 @@
 \chapter{Projektphase 2 – Webserver}
+Die Phase Webserver soll demonstrieren, für welche typischen Angriffsmethoden Webseiten anfällig sind. Dabei werden im Rahmen der Demonstration zwei Angriffe durchgeführt – eine \ac{XSS} Attacke und eine SQL Injection. 
 \section{Setup}
 \subsection{Datenbank}
 Für das Projekt wurde PostgreSQL (auch einfach als Postgres bezeichnet) als Datenbank gewählt. So wurde über Docker eine Container-Instanz einer Postgres Datenbank gestartet, die auf einem Port auf der Hostmaschine auf Nachrichten wartet und über die Adresse localhost:5432 erreichbar ist. \\
@@ -15,6 +16,12 @@ Die Tabelle Post enthält neben der ID noch die Attribute Title und Content, wel
 Als Vorbereitung für die Demonstration beider Attacken wurden bereits Beispiel-Posts und User angelegt, um ein anschaulicheres Ergebnis zu erhalten.
 \pagebreak
 \subsection{API}
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{img/phase2.png}
+    \caption{API Setup}
+    \label{fig:api}
+\end{figure}
 Zur Demonstration der beiden Attacken werden zwei APIs genutzt. Beide werden mit Hilfe des Express.js Frameworks implementiert. \\
 Die erste – und umfangreichere – API stellt die Schnittstelle zur Datenbank der Blog-Applikation dar. Hier werden die typischen CRUD Operationen durchgeführt und ans Frontend angebunden. Zudem wird die Session-Erstellung hier geregelt.\\
 Zu Demonstrationszwecken wurden bewusst Sicherheitsfunktionen in dieser API umgangen. Es wurde zum Beispiel darauf verzichtet, das HTTPOnly Attribut des Cookies zu setzen, was den Zugriff auf den Cookie aus einem Skript heraus verhindern würde. Zudem wird der Cookie im Klartext verschickt, anstatt verschlüsselt zu werden, was ebenfalls die potentielle Sicherheit der Demonstrationsapplikation untergräbt.\\

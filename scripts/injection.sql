@@ -1,1 +1,1 @@
-');DELETE FROM blog.post WHERE title = 'test';
+');DELETE FROM blog.post WHERE title = 'test'; --

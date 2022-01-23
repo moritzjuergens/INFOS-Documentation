@@ -1,6 +1,7 @@
 % !TEX root =  master.tex
 \chapter{Projektphase 1 – Firewall}
 Die Firewall-Konfigurationen wurden mittels IP-Tables auf der Opfermaschine erstellt. Dabei wurden Bash-Scripts implementiert, um die jeweils notwendigen Befehle nachvollziehen zu können. Zudem wird sämtlicher Datenverkehr der Penetrationstests aufgezeichnet und interpretiert. 
+
 \section{Offene Konfiguration}
 
 Zunächst wird auf der Opfermaschine eine offene Konfiguration der Firewall erstellt. Das bedeutet in diesem Fall, dass jeglicher eingehender sowie jeglicher ausgehender Datenverkehr ungehindert zugelassen wird. In dieser Konfiguration werden weder Kommunikationsquellen noch Inhalt gefiltert oder geblockt.
@@ -37,7 +38,7 @@ Der erste NMAP-Scan wird mit vier paramentern versehen. Zunächst muss die Ziela
 Output:
 \lstinputlisting[]{scripts/scans/nmap_p_A_T4}
 
-Im Output ist zu erkennen, dass alle gescannten Ports geschlossen sind. Dies war zu erwarten, da auf der Opfermaschine keine Services laufen und somit keine Ports genutzt werden. Dennoch lässt der Fakt, dass die Ports als geschlossen gezeigt werden, auf weitere Informationen schließen. Zum einen wird dadurch bekannt, dass die Anfragen ungefiltert an die Opfermaschine durchgekommen sind. Im gleichen Zuge wird erkannt, dass die Angreifermaschiene Antworten auf ihre Anfragen erhalten hat. Demnach kann der Angreifer zu dem Entschluss kommen, dass die Firewall offen ist. 
+Im Output ist zu erkennen, dass alle gescannten Ports geschlossen sind. Dies war zu erwarten, da auf der Opfermaschine keine Services laufen und somit keine Ports genutzt werden. Dennoch lässt der Fakt, dass die Ports als geschlossen gezeigt werden, auf weitere Informationen schließen. Zum einen wird dadurch bekannt, dass die Anfragen ungefiltert an die Opfermaschine durchgekommen sind. Im gleichen Zuge wird erkannt, dass die Angreifermaschine Antworten auf ihre Anfragen erhalten hat. Demnach kann der Angreifer zu dem Entschluss kommen, dass die Firewall offen ist. 
 Zusätzlich zu dem Portstatus wird die MAC-Adresse und der Hersteller des Geräts identifiziert. Zudem versucht das Tool Angaben über das Betriebssystem zu machen. In diesem Fall konnte kein Betriebssystem identifiziert werden, da die Antworten zu ungenau bzw. zu generisch waren. Als letzte Information gibt NMAP die Traceroute an. Das heißt, es wird angegeben welchem Pfad die Anfragen gefolgt sind und wie lange sie für den Rundentrip gebraucht haben.
 
 \begin{figure}
@@ -46,7 +47,7 @@ Zusätzlich zu dem Portstatus wird die MAC-Adresse und der Hersteller des Gerät
 	\label{fig:ws_firewall_open}
 \end{figure}
 
-Im Wireshark-Mitschnitt (Abbildung \ref{fig:ws_firewall_open}) wird der Datenverkehr der Opfermaschine gezeigt. Zu erkennen in grau, sind die eingehenden Anfragen der Angreifermaschiene. Hier werden TCP SYN Anfragen an das Opfer geschickt und eine ACK bzw. RST Antwort erwartet. Dies ist die Einleitung einer TCP Verbindung, welche bei diesem Scan nie vollständig durchgeführt wird. Da die Ports der Opfermaschine nicht gefiltert werden, werden die Anfragen verarbeitet und dem Angreifer wird geantwortet. Bei Eingang einer ACK oder RST Nachricht auf der Angreifermaschiene wird der Kontakt zum Port abgebrochen und somit keine Verbindung erstellt. Alleine durch das Antworten verrät das Opfer bereits den Status der Ports. Sollte der Angreifer eine ACK Nachricht erhalten, so ist der gefragte Port offen und "hört" auf einkommende Anfragen. Im Falle einer RST Nachricht ist der Port geschlossen.
+Im Wireshark-Mitschnitt (Abbildung \ref{fig:ws_firewall_open}) wird der Datenverkehr der Opfermaschine gezeigt. Zu erkennen in grau, sind die eingehenden Anfragen der Angreifermaschine. Hier werden TCP SYN Anfragen an das Opfer geschickt und eine ACK bzw. RST Antwort erwartet. Dies ist die Einleitung einer TCP Verbindung, welche bei diesem Scan nie vollständig durchgeführt wird. Da die Ports der Opfermaschine nicht gefiltert werden, werden die Anfragen verarbeitet und dem Angreifer wird geantwortet. Bei Eingang einer ACK oder RST Nachricht auf der Angreifermaschine wird der Kontakt zum Port abgebrochen und somit keine Verbindung erstellt. Alleine durch das Antworten verrät das Opfer bereits den Status der Ports. Sollte der Angreifer eine ACK Nachricht erhalten, so ist der gefragte Port offen und "hört" auf einkommende Anfragen. Im Falle einer RST Nachricht ist der Port geschlossen.
  Sollte keine Antwort verschickt werden interpretiert NMAP den Port als gefiltert. Ein SYN Scan eignet sich besonders aufgrund der Geschwindigkeit des Scans und der Verlässlichkeit der Ergebnisse.
 
 \subsubsection{nmap 10.0.2.4 -sU -T4}
@@ -66,7 +67,27 @@ Auf der Abbildung \ref{fig:ws_firewall_open_udp} ist zu erkennen, wie der UDP Sc
 Am Output des Scans lässt sich erkennen, dass dieser wesentlich länger gebraucht hat als der vorherige TCP Scan. So hat der UDP Scan 18 Minuten gebraucht um die wichtigesten 1000 Ports des Opfers zu scannen. Desweiteren wird berichtet, dass acht Ports offen bzw. gefiltert sind. Da keine Services auf der Opfermaschine laufen oder Firewall-Filter gesetzt sind lässt sich vermuten, dass diese Ports fehlerhaft als offen | gefiltert angezeigt werden. So kann es sein, dass die Opfermaschine nicht schnell genug auf die Anfragen des Angreifers geantwortet haben und somit der Timeout von NMAP erreicht wurde. 
 
 \subsection{Penetrationtest - Outward}
-Als nächstes wird getestet, welchen Einfluss die Firewall auf die Funktionalität der Maschine hat. So wird zunächst getestet 
+Als nächstes wird getestet, welchen Einfluss die Firewall auf die Funktionalität der Maschine hat. Es werden hierbei zwei Punkte getestet. Zunächst wird mittels wget überprüft, ob das World-Wide-Web erreichbar ist. Daraufhin wird überprüft, ob andere Maschinen im Netzwerk erreicht werden können. 
+
+\subsubsection*{wget https://google.com}
+
+Um zu testen ob das WWW von der Opfermaschine erreichbar ist, wurde mittels des wget Befehls versucht google.com zu erreichen. Das Ziel war es eine index.html von Google zu erhalten und dadurch zu verdeutlichen, dass sowohl HTTPS wie auch DNS auf der Maschine uneingeschränkt funktionieren. Da in dieser Firewall-Konfiguration alle Ports uneingeschränkt sind war davon auszugehen, dass die Maschine ohne Fehler eine index.html erhalten sollte. \\
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/open-in-out-output.png}
+	\caption{wget bei offener Firewall-Konfiguration}
+	\label{fig:wget_open}
+\end{figure}
+
+Wie im Output \ref*{fig:wget_open} zu erkennen, wird auf Anfrage eine index.html von https://google.com erhalten. Demnach lässt sich erkennen, dass sowohl HTTPS wie auch DNS funktionieren. 
+
+\subsubsection*{nc 10.0.2.5 4445}
+Als nächstes wurde überprüft, ob eine Verbindung zu einer benachbarten Maschine hergestellt werden kann. Um dies zu testen, wurde über das Tool NetCat versucht eine Verbindung auf dem Port 4445 der Zielmaschine herzustellen. Damit eine Verbindung hergestellt werden kann, wurde auf der Maschine 10.0.2.5 im Terminal der komplementäre Befehl ``nc -lvp 4445 -e /bin/bash' ausgeführt. So weiß die Zielmaschine, auf welchem Port nach Verbindungsanfragen gelauscht werden muss. Zusätzlich erhält der Kommunikationspartner Zugriff auf Konsolenfunktionen der Zielmaschine. So kann nach Verbindungsaufbau kontrolliert werden, dass die Verbindung erstellt wurde. 
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/open_nc.png}
+	\caption{NetCat-Ergebnis bei offener Konfiguration}
+	\label{fig:nc_open}
+\end{figure}
+\\Im Output \ref{fig:nc_open} lässt sich erkennen, dass die Maschine 10.0.2.4 nun Zugriff auf die Konsole der Maschine 10.0.2.5 besitzt. Durch den Befehl ifconfig, lässt sich dies beweisen. Demnach hat die Verbindung funktioniert, was bei dieser offenen Konfiguration zu erwarten war. 
 \section{Geschlossene Konfiguration}
 Als nächstes wird eine Konfiguration getestet, in der alle Verbindungen geblockt werden. Zu dieser Konfiguration gehören die Ausnahmen: SSH und localhost. Das Ziel dieses Tests ist es zu prüfen, wie die Opfermaschine von außen angesprochen werden kann – bzw. welche Informationen ein potentieller Angreifer erhalten könnte.
  
@@ -104,7 +125,7 @@ Ebenfalls wird erneut der Datenverkehr der Opfermaschine aufgezeichnet.
 \lstinputlisting{scripts/scans/nmap_p_A_T4_closed}
 
 An der Ausgabe des Scans lässt sich erkennen, dass trotz der verschärften Regelungen die MAC Adresse sowie der Hersteller des Geräts erkannt wurde. 
-Der wichtigste Punkt ist jedoch, dass alle Ports des Opfers nun als gefiltert anstatt als geschlossen erkannt werden. Dies liegt daran, dass keine Antwort auf die SYN Pakete des Angreifers verschickt werden. Wie bereits beschrieben, interpretiert NMAP bei einem TCP SYN Scan das Fehlen einer Antwort als Filterung des angesprochenen Ports. Dies wird anhand der Abbildung \ref{fig:ws_firewall_closed} deutlich. Dort ist zu sehen, wie die Pakete der Angreifermaschiene von der Adresse 10.0.2.5 auf der Opfermaschine eintreffen. Jedoch antwortet die Opfermaschine nicht, anders als in Abbildung \ref{fig:ws_firewall_open}.
+Der wichtigste Punkt ist jedoch, dass alle Ports des Opfers nun als gefiltert anstatt als geschlossen erkannt werden. Dies liegt daran, dass keine Antwort auf die SYN Pakete des Angreifers verschickt werden. Wie bereits beschrieben, interpretiert NMAP bei einem TCP SYN Scan das Fehlen einer Antwort als Filterung des angesprochenen Ports. Dies wird anhand der Abbildung \ref{fig:ws_firewall_closed} deutlich. Dort ist zu sehen, wie die Pakete der Angreifermaschine von der Adresse 10.0.2.5 auf der Opfermaschine eintreffen. Jedoch antwortet die Opfermaschine nicht, anders als in Abbildung \ref{fig:ws_firewall_open}.
 
 \begin{figure}
 	\includegraphics[width=\linewidth]{img/ws_firewall_closed.png}
@@ -126,11 +147,27 @@ Output:
 Der Output bestätigt die Hypothese. Da der Angreifer keine Antworten erhalten hat, kann keine genaue Aussage über den Status der Ports getroffen werden. 
 
 \subsection{Penetrationtest – Outward}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum fermentum semper mollis. Ut porta odio in ultrices fermentum. Aenean id pulvinar nisi. Phasellus porttitor condimentum suscipit. Nulla facilisi. Mauris in malesuada arcu. Morbi tempus bibendum tempor.
+Wie auch bei der vorherigen Konfiguration, wird gestestet welchen Einfluss die Firewall auf die Funktionstüchtigkeit der Maschine hat. 
+Da sowohl eingehende als auch ausgehende Verbindungen von der Firewall geblockt werden, ist es anzunehmen, dass beide Tests fehlschlagen.
 
-Vivamus sit amet tellus pellentesque, commodo est vitae, interdum ante. In eu vestibulum dolor, in venenatis felis. Ut risus odio, convallis in aliquet quis, luctus quis sem. Vivamus malesuada ex eget vehicula finibus. Mauris iaculis finibus diam vel ultrices. Morbi luctus nulla euismod sodales posuere. Integer dignissim gravida orci, at porttitor nibh varius ac. Donec vel efficitur nulla. In fermentum mauris elit, a efficitur elit accumsan id. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+\subsubsection*{wget https://google.com}
+Zunächst wird erneut getestet, ob das WWW von der Maschine zu erreichen ist. Dafür wird versucht eine index.html von google.com zu erhalten. Da der Port 443 – für https – geblockt ist, ist zu erwarten, dass die Verbindung fehlschlägt. Zudem ist Port 53 – welcher für DNS zuständig ist – ebenfalls geblockt. Was dazu führt, dass der Name google.com keiner IP zugeordnet werden kann. Um zusätzlich zu überprüfen, ob der tatsächliche Server von Google ebenfalls nicht erreichbar ist, wird die IP direkt genutzt. 
 
-Proin lacinia malesuada leo sit amet bibendum. Integer dictum ultrices enim id condimentum. Ut egestas vulputate quam. Pellentesque bibendum nec turpis ac ultricies. Sed at ligula nec urna bibendum convallis consequat at turpis. Sed id dolor eros. Nullam maximus turpis in massa ornare accumsan. Sed id dapibus eros, tincidunt ullamcorper risus. In tincidunt, nunc at suscipit placerat, nulla justo imperdiet est, id convallis libero elit a nulla. Vivamus velit odio, convallis sed dignissim vitae, pharetra eu tellus. Sed eu dignissim felis, ac rhoncus est. Vivamus ac aliquam urna. Pellentesque lectus risus, porta eu diam in, volutpat pharetra justo. Donec elit diam, maximus vitae congue et, condimentum a magna. 
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/closed-in-out-output.png}
+	\caption{Versuch eines Verbindungsaufbaus bei geschlossener Firewall}
+	\label{fig:closed_in_out}
+\end{figure}
+
+Wie im Output \ref*{fig:closed_in_out} zu erkennen, lässt sich weder über DNS noch über eine direkte IP Adresse eine Verbindung zu google.com aufbauen. Demnach ist es bewiesen, dass die Firewall keine Verbindung ins World Wide Web zulässt.
+
+\subsubsection*{nc 10.0.2.5 4445}
+
+Als nächstes wird getestet, ob die Maschine sich mit einer benachbarten Maschine via NetCat verbinden kann. Da alle Ports geblockt sind, ist zu erwarten, dass keine Verbindung hergestellt werden kann. Das Vorgehen ist das Gleiche, wie im Kapitel 2.1.3.
+Zunächst wird auf der Nachbarmaschine – 10.0.2.5 – der Port 4445 mittels NetCat geöffnet und darauf gewartet, dass eine Verbindung hergestellt wird. Daraufhin wird auf der Maschine 10.0.2.4 mittels des NetCat Befehls versucht eine Verbindung aufzubauen. Um zu erkennen, wann eine Verbindung fehlschlägt, wird dem Befehl der Modifier -w angehängt. Dieser erlaubt es eine Sekundenzahl als Timeout anzugeben.
+Output:
+\lstinputlisting{scripts/nc_closed}
+Wie zu erkennen, lässt sich keine Verbindung zu Nachbarmaschine herstellen. Dies war zu erwarten, da alle Ports von der Firewall blockiert werden.
 
 \newpage
 \section{Standard Konfiguration}
@@ -178,5 +215,22 @@ Output:
 \end{figure}
 \subsection{Penetrationtest – Outward}
 
-Als nächstes wird getestet, welchen Einfluss
+Abschließend wird auch bei dieser Firewall-Konfiguration überprüft, welchen Einfluss die Firewall auf die ausgehenden Verbindungen der Maschine besitzt. Das Verfahren ist gleich dem der zwei Vorgängern. 
 
+\subsubsection*{wget https://google.com}
+Zunächst soll getestet werden, ob google.com erreichbar ist. Die Ports für http und https sind beide in die ausgehende Richtung freigegeben, demnach sollte es zu erwarten sein, dass eine Verbindung zum WWW hergestellt werden kann. Zusätzlich wurde der Port 53 für DNS freigegeben. So sollte es möglich sein über die Domain google.com eine Verbindung aufzubauen. 
+\begin{figure}
+	\includegraphics[width=\linewidth]{img/standard_in_out_output.png}
+	\caption{Erfolgreicher Verbindungsaufbau zum WWW bei Standardfirewall}
+	\label{fig:standard_in_out}
+\end{figure}
+
+Wie im Output \ref{fig:standard_in_out} zu erkennen, lässt sich sowohl die Domain google.com auflösen, wie auch eine Verbindung zu der Gleichen herstellen. Dies lässt darauf schließen dass die freigegeben Ports ordnungsgemäß funktionieren, obwohl sie nur in eine "Richtung" freigegeben sind. Dies funktioniert, da established connections – also etablierte Verbindungen – freigegeben sind. Das bedeutet dass Antworten auf die Anfragen der Maschine durch die Firewall kommen aber fremde Anfragen nicht. Dies hilft dabei ungewünschte Verbindungen vorzubeugen.
+
+\subsubsection*{nc 10.0.2.5 4445}
+Abschließend soll nun getestet werden, ob die Maschine eine Verbindung zu ihrem Nachbarn über arbiträre Ports aufbauen kann. Dafür wird erneut mittels des NetCat Befehls versucht eine Verbindung zur Maschine auf 10.0.2.5 aufzubauen. 
+Der Befehl auf dieser Nachbarmaschine ist gleich dem der anderen Tests aus Kapiteln 2.1.3 und 2.2.3. Genau so ist der Befehl auf der Maschine 10.0.2.4 gleich. Da bis auf ein paar Ausnahmen alle Ports weiterhin von der Firewall geblockt werden, ist es anzunehmen das dieser Verbindungsaufbau fehlschlagen wird. Es wird wieder ein Timeout von 60 Sekunden eingestellt. 
+
+\lstinputlisting{scripts/nc_closed}
+
+Wie zu erkennen ist es erneut fehlgeschlagen eine Verbindung zur Nachbarmaschine aufzubauen. 
