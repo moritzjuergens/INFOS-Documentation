@@ -7,7 +7,7 @@ Die Firewall-Konfigurationen wurden mittels IP-Tables auf der Opfermaschine erst
 Zunächst wird auf der Opfermaschine eine offene Konfiguration der Firewall erstellt. Das bedeutet in diesem Fall, dass jeglicher eingehender sowie jeglicher ausgehender Datenverkehr ungehindert zugelassen wird. In dieser Konfiguration werden weder Kommunikationsquellen noch Inhalt gefiltert oder geblockt.
 
 \subsection{Script}
-Der erste Schritt setzt die IP-Tables auf ihre Ursprungswerte zurück. Das heißt, dass alle einkommenden, ausgehenden und weitergeleiteten Pakete ungefiltert zugelassen werden. Zusätzlich zu der normalen IP-Tables Konfiguration wird hier auch noch die NAT-Konfiguration gesetzt.  
+Der erste Schritt setzt die IP-Tables auf ihre Ursprungswerte zurück. Das heißt, dass alle eingehenden, ausgehenden und weitergeleiteten Pakete ungefiltert zugelassen werden. Zusätzlich zu der normalen IP-Tables Konfiguration wird hier auch noch die NAT-Konfiguration gesetzt.  
 Das Script besteht aus drei wesentlichen Prozessen: 
 \begin{itemize}
 	\item Einstellung der Regeln (inklusive NAT)
@@ -27,13 +27,13 @@ Zusätzlich zu den drei Funktionen des Scripts wird nach Abschluss die Konfigura
 Output: 
 \lstinputlisting[]{scripts/output_firewall-open.sh}
 
-\subsection{Penetrationtest – Inward}
+\subsection{Penetrationstest – Inward}
 Da nun die Firewall der Opfermaschine konfiguriert wurde, können Penetrationstests durchgeführt werden. 
 Zunächst wird geprüft, welche Informationen über einen Portscan mit NMAP herausgefunden werden können. 
 Während der laufenden Scans wird zusätzlich der Datenverkehr der Opfermaschine mit Hilfe von Wireshark aufgezeichnet. 
 Dies hilft dabei die Reaktion – bzw. das Fehlen einer Reaktion – der Opfermaschine nachzuvollziehen.
 \subsubsection{nmap 10.0.2.4 -p- -A -T4}
-Der erste NMAP-Scan wird mit vier paramentern versehen. Zunächst muss die Zieladresse des Opfers angegeben werden. In diesem Fall befindet sich das Opfer im NAT-Netzwerk an der Adresse 10.0.2.4. Als nächstes wird die gewünschte Menge der Ports angegeben. Standardmäßig werden die 1000 wichtigsten Ports geprüft. Auf Grund der Gründlichkeit dieses Tests werden jedoch alle 65.535 Ports der Opfermaschine gescannt – zu erkennen am Parameter -p-. Darauf folgend wird erneut ein Parameter zu Gunsten der Gründlichkeit gesetzt. Der Parameter -A setzt die Aggressivität des Scans. So werden durch diesen Parameter Funktionen wie OS-Detection, Version-Scanning, Script-Scanning und Traceroute verwendet. Zuletzt wird ein Geschwindigkeitsparameter gesetzt. \\
+Der erste NMAP-Scan wird mit vier Paramentern versehen. Zunächst muss die Zieladresse des Opfers angegeben werden. In diesem Fall befindet sich das Opfer im NAT-Netzwerk an der Adresse 10.0.2.4. Als nächstes wird die gewünschte Menge der Ports angegeben. Standardmäßig werden die 1000 wichtigsten Ports geprüft. Auf Grund der Gründlichkeit dieses Tests werden jedoch alle 65.535 Ports der Opfermaschine gescannt – zu erkennen am Parameter -p-. Darauf folgend wird erneut ein Parameter zu Gunsten der Gründlichkeit gesetzt. Der Parameter -A setzt die Aggressivität des Scans. So werden durch diesen Parameter Funktionen wie OS-Detection, Version-Scanning, Script-Scanning und Traceroute verwendet. Zuletzt wird ein Geschwindigkeitsparameter gesetzt. \\
 
 Output:
 \lstinputlisting[]{scripts/scans/nmap_p_A_T4}
@@ -47,11 +47,11 @@ Zusätzlich zu dem Portstatus wird die MAC-Adresse und der Hersteller des Gerät
 	\label{fig:ws_firewall_open}
 \end{figure}
 
-Im Wireshark-Mitschnitt (Abbildung \ref{fig:ws_firewall_open}) wird der Datenverkehr der Opfermaschine gezeigt. Zu erkennen in grau, sind die eingehenden Anfragen der Angreifermaschine. Hier werden TCP SYN Anfragen an das Opfer geschickt und eine ACK bzw. RST Antwort erwartet. Dies ist die Einleitung einer TCP Verbindung, welche bei diesem Scan nie vollständig durchgeführt wird. Da die Ports der Opfermaschine nicht gefiltert werden, werden die Anfragen verarbeitet und dem Angreifer wird geantwortet. Bei Eingang einer ACK oder RST Nachricht auf der Angreifermaschine wird der Kontakt zum Port abgebrochen und somit keine Verbindung erstellt. Alleine durch das Antworten verrät das Opfer bereits den Status der Ports. Sollte der Angreifer eine ACK Nachricht erhalten, so ist der gefragte Port offen und "hört" auf einkommende Anfragen. Im Falle einer RST Nachricht ist der Port geschlossen.
+Im Wireshark-Mitschnitt (Abbildung \ref{fig:ws_firewall_open}) wird der Datenverkehr der Opfermaschine gezeigt. Zu erkennen in grau, sind die eingehenden Anfragen der Angreifermaschine. Hier werden TCP SYN Anfragen an das Opfer geschickt und eine ACK bzw. RST Antwort erwartet. Dies ist die Einleitung einer TCP Verbindung, welche bei diesem Scan nie vollständig durchgeführt wird. Da die Ports der Opfermaschine nicht gefiltert werden, werden die Anfragen verarbeitet und dem Angreifer wird geantwortet. Bei Eingang einer ACK oder RST Nachricht auf der Angreifermaschine wird der Kontakt zum Port abgebrochen und somit keine Verbindung erstellt. Alleine durch das Antworten verrät das Opfer bereits den Status der Ports. Sollte der Angreifer eine ACK Nachricht erhalten, so ist der gefragte Port offen und "hört" auf eingehende Anfragen. Im Falle einer RST Nachricht ist der Port geschlossen.
  Sollte keine Antwort verschickt werden interpretiert NMAP den Port als gefiltert. Ein SYN Scan eignet sich besonders aufgrund der Geschwindigkeit des Scans und der Verlässlichkeit der Ergebnisse.
 
 \subsubsection{nmap 10.0.2.4 -sU -T4}
- Zu prüfen, ob die Verbindung via UDP ebenfalls offen ist, wird als nächster Schritt ein UDP Scan mit NMAP durchgeführt. Wie bei dem vorherigen Scan sind hier ebenfalls die Parameter für die Geschwindigkeit gesetzt. Der -A Parameter wurde gegen -sU ausgetauscht. Der -sU Parameter gibt den Scantyp an. So wird anstatt eines TCP SYN Scans ein UDP Scan durchgeführt. Obwohl TCP den Großteil des Internetverkehrs prägt, ist UDP kein zu vernachlässigendes Protokoll. Bei diesem Scan werden UDP Pakete an die Ports geschickt. NMAP erwartet im Gegenzug ICMP Antworten. Entweder die Opfermaschine schickt eine Nachricht, dass der gewünschte Port nicht erreichbar ist – Port ist geschlossen – oder es wird eine andere Errornachricht verschickt, in welchem Falle der Port als gefiltert gesehen wird. Sollte das Opfer eine UDP Antwort verschicken, so ist der Port offen. Sei es der Fall, dass der Angreifer keine Antwort erhält wird der Port als entweder offen oder gefiltert interpretiert. 
+ Zu prüfen, ob die Verbindung via UDP ebenfalls offen ist, wird als nächster Schritt ein UDP Scan mit NMAP durchgeführt. Wie bei dem vorherigen Scan sind hier ebenfalls die Parameter für die Geschwindigkeit gesetzt. Der -A Parameter wurde gegen -sU ausgetauscht. Der -sU Parameter gibt den Scantyp an. So wird anstatt eines TCP SYN Scans ein UDP Scan durchgeführt. Obwohl TCP den Großteil des Internetverkehrs prägt, ist UDP kein zu vernachlässigendes Protokoll. Bei diesem Scan werden UDP Pakete an die Ports geschickt. NMAP erwartet im Gegenzug ICMP Antworten. Entweder die Opfermaschine schickt eine Nachricht, dass der gewünschte Port nicht erreichbar ist – Port ist geschlossen – oder es wird eine andere Error-Nachricht verschickt, in welchem Falle der Port als gefiltert gesehen wird. Sollte das Opfer eine UDP Antwort verschicken, so ist der Port offen. Sei es der Fall, dass der Angreifer keine Antwort erhält wird der Port als entweder offen oder gefiltert interpretiert. 
 Ein großes Hindernis an UDP Scanning ist der Zeitaufwand, da NMAP bei offenen Ports keine Antwort erhält und daraufhin auf den Timeout warten muss. Auf Grund dessen werden bei diesem Scan nur die wichtigsten 1000 Ports gescannt. Zudem ist die Verbindung via UDP wesentlich unverlässlicher als über TCP, was zu verfälschten Ergebnissen führen kann.
 
 \begin{figure}
@@ -64,9 +64,9 @@ Auf der Abbildung \ref{fig:ws_firewall_open_udp} ist zu erkennen, wie der UDP Sc
 
 \lstinputlisting{scripts/scans/nmap_sU_T4}
 
-Am Output des Scans lässt sich erkennen, dass dieser wesentlich länger gebraucht hat als der vorherige TCP Scan. So hat der UDP Scan 18 Minuten gebraucht um die wichtigesten 1000 Ports des Opfers zu scannen. Desweiteren wird berichtet, dass acht Ports offen bzw. gefiltert sind. Da keine Services auf der Opfermaschine laufen oder Firewall-Filter gesetzt sind lässt sich vermuten, dass diese Ports fehlerhaft als offen | gefiltert angezeigt werden. So kann es sein, dass die Opfermaschine nicht schnell genug auf die Anfragen des Angreifers geantwortet haben und somit der Timeout von NMAP erreicht wurde. 
+Am Output des Scans lässt sich erkennen, dass dieser wesentlich länger gebraucht hat als der vorherige TCP Scan. So hat der UDP Scan 18 Minuten gebraucht um die wichtigsten 1000 Ports des Opfers zu scannen. Desweiteren wird berichtet, dass acht Ports offen bzw. gefiltert sind. Da keine Services auf der Opfermaschine laufen oder Firewall-Filter gesetzt sind lässt sich vermuten, dass diese Ports fehlerhaft als offen | gefiltert angezeigt werden. So kann es sein, dass die Opfermaschine nicht schnell genug auf die Anfragen des Angreifers geantwortet haben und somit der Timeout von NMAP erreicht wurde. 
 
-\subsection{Penetrationtest - Outward}
+\subsection{Penetrationstest - Outward}
 Als nächstes wird getestet, welchen Einfluss die Firewall auf die Funktionalität der Maschine hat. Es werden hierbei zwei Punkte getestet. Zunächst wird mittels wget überprüft, ob das World-Wide-Web erreichbar ist. Daraufhin wird überprüft, ob andere Maschinen im Netzwerk erreicht werden können. 
 
 \subsubsection*{wget https://google.com}
@@ -115,7 +115,7 @@ Abschließend werden erneut die Loggingbefehle gesetzt.
 
 \lstinputlisting{scripts/output_firewall-closed}
 
-\subsection{Penetrationtest – Inward}
+\subsection{Penetrationstest – Inward}
 Nun sind alle Ports der Opfermaschine geblockt bzw. gefiltert. Um zu überprüfen, ob das Script funktioniert hat werden nun eine Reihe an Tests abgeschlossen. Zunächst werden wieder NMAP Scans die Grundlage bilden, von der wichtige Informationen über das Ziel abgeleitet werden können.
 
 \subsubsection{nmap 10.0.2.4 -p- -A -T4}
@@ -146,8 +146,8 @@ Output:
 
 Der Output bestätigt die Hypothese. Da der Angreifer keine Antworten erhalten hat, kann keine genaue Aussage über den Status der Ports getroffen werden. 
 
-\subsection{Penetrationtest – Outward}
-Wie auch bei der vorherigen Konfiguration, wird gestestet welchen Einfluss die Firewall auf die Funktionstüchtigkeit der Maschine hat. 
+\subsection{Penetrationstest – Outward}
+Wie auch bei der vorherigen Konfiguration, wird getestet welchen Einfluss die Firewall auf die Funktionstüchtigkeit der Maschine hat. 
 Da sowohl eingehende als auch ausgehende Verbindungen von der Firewall geblockt werden, ist es anzunehmen, dass beide Tests fehlschlagen.
 
 \subsubsection*{wget https://google.com}
